@@ -11,14 +11,24 @@ client = Groq(
 
 CLAIM_EXTRACTION_PROMPT = """You are an expert fact-checker.
 
-Read the document below and extract every verifiable factual claim.
+Read the document below and extract ALL verifiable factual claims.
+
+IMPORTANT:
+- Extract both TRUE and FALSE claims.
+- Do NOT skip claims just because they seem obviously incorrect.
+- Include general knowledge claims.
+- Include geographical, scientific, historical, and educational claims.
 
 Focus on:
-- Statistics and percentages
-- Dates and years
-- Financial figures
-- Technical figures
-- Named-entity factual statements
+- statistics
+- percentages
+- dates
+- years
+- financial figures
+- technical figures
+- scientific claims
+- geographical claims
+- named-entity factual statements
 
 For each claim, return ONLY a JSON array.
 
@@ -34,9 +44,13 @@ Allowed categories:
 - technical
 - entity
 
-Skip opinions, predictions, and marketing fluff.
+Skip:
+- opinions
+- predictions
+- motivational language
+- marketing fluff
 
-Extract at most 15 claims.
+Extract ALL factual claims from the document.
 
 DOCUMENT:
 {document}
@@ -46,13 +60,12 @@ Return ONLY valid JSON.
 Example:
 [
   {{
-    "claim": "ChatGPT has 200 million weekly active users",
-    "category": "statistic",
-    "search_query": "ChatGPT weekly active users"
+    "claim": "The Eiffel Tower is located in Berlin",
+    "category": "entity",
+    "search_query": "Eiffel Tower location"
   }}
 ]
 """
-
 
 def extract_claims(document_text):
 
