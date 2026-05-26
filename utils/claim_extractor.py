@@ -127,10 +127,17 @@ def extract_claims(document):
 
             parsed = json.loads(content)
 
-            claims = parsed.get(
-                "claims",
-                []
-            )
+            content = content.strip()
+            
+            if content.startswith("```json"):
+                content = content.replace("```json", "")
+            
+            if content.startswith("```"):
+                content = content.replace("```", "")
+            
+            content = content.strip()
+            
+            parsed = json.loads(content)
 
             for item in claims:
 
