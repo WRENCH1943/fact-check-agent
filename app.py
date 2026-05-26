@@ -440,8 +440,6 @@ st.markdown("""
     <h1 class="hero-title">Fact<span>Lens</span></h1>
     <p class="hero-sub">
         Upload any PDF document.<br>
-        Extract every factual claim.<br>
-        Verify each one against the live web.
     </p>
     <div class="hero-line"></div>
 </div>
