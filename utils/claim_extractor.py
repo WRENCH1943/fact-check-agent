@@ -32,11 +32,11 @@ IGNORE:
 Return ONLY valid JSON array.
 
 Each item MUST contain:
-{
+{{
   "claim": "...",
   "category": "...",
   "search_query": "..."
-}
+}}
 
 Allowed categories:
 - statistic
