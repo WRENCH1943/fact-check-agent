@@ -367,7 +367,7 @@ if uploaded_file:
                 inaccurate_count,
                 unverifiable_count
             ),
-            unsafe_allow_html=True
+            unsafe_allow_html=False
         )
 
 else:
