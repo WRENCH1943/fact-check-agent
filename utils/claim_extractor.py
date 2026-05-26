@@ -1,3 +1,4 @@
+import streamlit as st
 import json
 from groq import Groq
 
@@ -55,7 +56,7 @@ DOCUMENT:
 """
 
 client = Groq(
-    api_key=GROQ_API_KEY
+    api_key=st.secrets["GROQ_API_KEY"]
 )
 
 
