@@ -479,6 +479,149 @@ st.markdown(
         gap: 8px;
     }
 
+    /* ──────────── SUMMARY DASHBOARD ──────────── */
+    .summary-dashboard {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 2rem;
+    }
+    .summary-card {
+        padding: 1.4rem 1.2rem;
+        border-radius: 16px;
+        background: rgba(15,15,30,0.6);
+        border: 1px solid rgba(99,102,241,0.10);
+        backdrop-filter: blur(16px);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.25s, border-color 0.25s;
+    }
+    .summary-card:hover {
+        transform: translateY(-3px);
+    }
+    .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+    }
+    .summary-card.total::before {
+        background: linear-gradient(90deg, #6366f1, #a78bfa);
+    }
+    .summary-card.total:hover {
+        border-color: rgba(99,102,241,0.3);
+    }
+    .summary-card.verified::before {
+        background: linear-gradient(90deg, #10b981, #34d399);
+    }
+    .summary-card.verified:hover {
+        border-color: rgba(16,185,129,0.3);
+    }
+    .summary-card.false-claim::before {
+        background: linear-gradient(90deg, #ef4444, #f87171);
+    }
+    .summary-card.false-claim:hover {
+        border-color: rgba(239,68,68,0.3);
+    }
+    .summary-card.inconclusive::before {
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+    .summary-card.inconclusive:hover {
+        border-color: rgba(245,158,11,0.3);
+    }
+
+    .summary-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        margin-bottom: 0.7rem;
+    }
+    .summary-card.total .summary-icon {
+        background: rgba(99,102,241,0.12);
+        color: #a78bfa;
+    }
+    .summary-card.verified .summary-icon {
+        background: rgba(16,185,129,0.12);
+        color: #34d399;
+    }
+    .summary-card.false-claim .summary-icon {
+        background: rgba(239,68,68,0.12);
+        color: #f87171;
+    }
+    .summary-card.inconclusive .summary-icon {
+        background: rgba(245,158,11,0.12);
+        color: #fbbf24;
+    }
+
+    .summary-number {
+        font-family: 'Poppins', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.3rem;
+    }
+    .summary-card.total .summary-number {
+        color: #a78bfa;
+    }
+    .summary-card.verified .summary-number {
+        color: #34d399;
+    }
+    .summary-card.false-claim .summary-number {
+        color: #f87171;
+    }
+    .summary-card.inconclusive .summary-number {
+        color: #fbbf24;
+    }
+
+    .summary-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: #64748b !important;
+    }
+
+    .summary-bar-track {
+        width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255,255,255,0.05);
+        margin-top: 0.8rem;
+        overflow: hidden;
+    }
+    .summary-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.6s ease;
+    }
+    .summary-card.total .summary-bar-fill {
+        background: linear-gradient(90deg, #6366f1, #a78bfa);
+    }
+    .summary-card.verified .summary-bar-fill {
+        background: linear-gradient(90deg, #10b981, #34d399);
+    }
+    .summary-card.false-claim .summary-bar-fill {
+        background: linear-gradient(90deg, #ef4444, #f87171);
+    }
+    .summary-card.inconclusive .summary-bar-fill {
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+
+    .summary-pct {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-top: 0.35rem;
+        color: #475569 !important;
+    }
+
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -682,6 +825,12 @@ if uploaded_file:
                 unsafe_allow_html=True
             )
 
+            # ── Track verification results ──
+            verified_count = 0
+            false_count = 0
+            inconclusive_count = 0
+            results_data = []
+
             for index, claim in enumerate(claims):
 
                 with st.container():
@@ -706,22 +855,76 @@ if uploaded_file:
                     result_upper = result.upper()
 
                     if "VERIFIED" in result_upper:
-
+                        verified_count += 1
                         st.success(result)
-
                     elif "FALSE" in result_upper:
-
+                        false_count += 1
                         st.error(result)
-
                     elif "INACCURATE" in result_upper:
-
+                        false_count += 1
                         st.warning(result)
-
                     else:
-
+                        inconclusive_count += 1
                         st.info(result)
 
                     st.divider()
+
+            # ── Summary Dashboard ──
+            total = len(claims)
+            v_pct = round((verified_count / total) * 100) if total else 0
+            f_pct = round((false_count / total) * 100) if total else 0
+            i_pct = round((inconclusive_count / total) * 100) if total else 0
+
+            st.markdown("---")
+
+            st.markdown(
+                '<div class="section-header">📊 Verification Summary</div>',
+                unsafe_allow_html=True
+            )
+
+            st.markdown(
+                f"""
+                <div class="summary-dashboard">
+                    <div class="summary-card total">
+                        <div class="summary-icon">📋</div>
+                        <div class="summary-number">{total}</div>
+                        <div class="summary-label">Total Claims</div>
+                        <div class="summary-bar-track">
+                            <div class="summary-bar-fill" style="width:100%;"></div>
+                        </div>
+                        <div class="summary-pct">100%</div>
+                    </div>
+                    <div class="summary-card verified">
+                        <div class="summary-icon">✅</div>
+                        <div class="summary-number">{verified_count}</div>
+                        <div class="summary-label">Verified</div>
+                        <div class="summary-bar-track">
+                            <div class="summary-bar-fill" style="width:{v_pct}%;"></div>
+                        </div>
+                        <div class="summary-pct">{v_pct}%</div>
+                    </div>
+                    <div class="summary-card false-claim">
+                        <div class="summary-icon">❌</div>
+                        <div class="summary-number">{false_count}</div>
+                        <div class="summary-label">False / Inaccurate</div>
+                        <div class="summary-bar-track">
+                            <div class="summary-bar-fill" style="width:{f_pct}%;"></div>
+                        </div>
+                        <div class="summary-pct">{f_pct}%</div>
+                    </div>
+                    <div class="summary-card inconclusive">
+                        <div class="summary-icon">⚠️</div>
+                        <div class="summary-number">{inconclusive_count}</div>
+                        <div class="summary-label">Inconclusive</div>
+                        <div class="summary-bar-track">
+                            <div class="summary-bar-fill" style="width:{i_pct}%;"></div>
+                        </div>
+                        <div class="summary-pct">{i_pct}%</div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
 else:
 
