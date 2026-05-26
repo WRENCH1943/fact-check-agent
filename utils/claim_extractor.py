@@ -87,122 +87,106 @@ def chunk_text(
 
 def extract_claims(document):
 
-    if not document:
+    if not document or len(document.strip()) < 20:
         return []
 
-    all_claims = []
+    prompt = CLAIM_EXTRACTION_PROMPT.format(
+        document=document[:12000]
+    )
 
-    chunks = chunk_text(document)
+    try:
 
-    for chunk in chunks:
+        response = client.chat.completions.create(
 
-        prompt = CLAIM_EXTRACTION_PROMPT.format(
-            document=chunk
+            model="llama-3.3-70b-versatile",
+
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Return only valid JSON."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+
+            temperature=0
         )
 
-        try:
-
-            response = client.chat.completions.create(
-
-                model="llama-3.3-70b-versatile",
-
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-
-                temperature=0
-
-            )
-
-            content = (
-                response
-                .choices[0]
-                .message
-                .content
-                .strip()
-            )
-
-            parsed = json.loads(content)
-
-            content = content.strip()
-            
-            if content.startswith("```json"):
-                content = content.replace("```json", "")
-            
-            if content.startswith("```"):
-                content = content.replace("```", "")
-            
-            content = content.strip()
-            
-            parsed = json.loads(content)
-
-            for item in claims:
-
-                if not isinstance(item, dict):
-                    continue
-
-                claim = (
-                    item.get("claim", "")
-                    .strip()
-                )
-
-                category = (
-                    item.get("category", "")
-                    .strip()
-                )
-
-                search_query = (
-                    item.get(
-                        "search_query",
-                        ""
-                    )
-                    .strip()
-                )
-
-                if (
-                    claim and
-                    category and
-                    search_query
-                ):
-
-                    all_claims.append({
-
-                        "claim": claim,
-
-                        "category": category,
-
-                        "search_query": search_query
-
-                    })
-
-        except Exception as e:
-
-            print(
-                f"Claim extraction failed: {e}"
-            )
-
-            continue
-
-
-    unique_claims = []
-
-    seen = set()
-
-    for item in all_claims:
-
-        normalized = (
-            item["claim"]
-            .lower()
+        content = (
+            response
+            .choices[0]
+            .message
+            .content
             .strip()
         )
 
-        if normalized not in seen:
+        print(content)
 
-            seen.add(normalized)
+        content = (
+            content
+            .replace("```json", "")
+            .replace("```", "")
+            .strip()
+        )
 
-            unique_claims.append(item)
+        parsed = json.loads(content)
 
-    return unique_claims[:15]
+        claims = parsed.get(
+            "claims",
+            []
+        )
+
+        cleaned_claims = []
+
+        seen = set()
+
+        for item in claims:
+
+            if not isinstance(item, dict):
+                continue
+
+            claim = item.get(
+                "claim",
+                ""
+            ).strip()
+
+            category = item.get(
+                "category",
+                ""
+            ).strip()
+
+            search_query = item.get(
+                "search_query",
+                ""
+            ).strip()
+
+            if (
+                claim and
+                claim.lower() not in seen
+            ):
+
+                seen.add(
+                    claim.lower()
+                )
+
+                cleaned_claims.append({
+
+                    "claim": claim,
+
+                    "category": category,
+
+                    "search_query": search_query
+
+                })
+
+        return cleaned_claims
+
+    except Exception as e:
+
+        print(
+            f"Extractor Error: {e}"
+        )
+
+        return []
