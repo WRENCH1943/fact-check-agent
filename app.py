@@ -245,7 +245,7 @@ def render_summary(
     """
 
 
-st.markdown("""
+st.markdown(f"""
 <div class="hero">
 
     <div class="hero-title">
@@ -379,7 +379,7 @@ if uploaded_file:
         st.markdown("---")
 
         st.markdown(
-            "## 📊 Summary"
+            f"## 📊 Summary"
         )
 
         st.markdown(
