@@ -1,4 +1,5 @@
 import streamlit as st
+import html
 
 from utils.pdf_parser import extract_text_from_pdf
 from utils.claim_extractor import extract_claims
@@ -172,19 +173,36 @@ def render_claim_card(
     status_class
 ):
 
+    safe_claim = html.escape(
+        str(claim_text)
+    )
+
+    safe_category = html.escape(
+        str(category)
+    )
+
+    safe_result = html.escape(
+        str(result_text)
+    )
+
+    safe_result = safe_result.replace(
+        "\n",
+        "<br>"
+    )
+
     return f"""
     <div class="claim-card {status_class}">
 
         <div class="claim-title">
-            {claim_text}
+            {safe_claim}
         </div>
 
         <div class="claim-category">
-            📂 Category: {category}
+            📂 Category: {safe_category}
         </div>
 
         <div class="claim-result">
-            {result_text}
+            {safe_result}
         </div>
 
     </div>
@@ -245,7 +263,7 @@ def render_summary(
     """
 
 
-st.markdown(f"""
+st.markdown("""
 <div class="hero">
 
     <div class="hero-title">
@@ -345,25 +363,21 @@ if uploaded_file:
             if "VERIFIED" in result_upper:
 
                 verified_count += 1
-
                 status_class = "status-verified"
 
             elif "FALSE" in result_upper:
 
                 false_count += 1
-
                 status_class = "status-false"
 
             elif "INACCURATE" in result_upper:
 
                 inaccurate_count += 1
-
                 status_class = "status-inaccurate"
 
             else:
 
                 unverifiable_count += 1
-
                 status_class = "status-unverifiable"
 
             st.markdown(
@@ -379,7 +393,7 @@ if uploaded_file:
         st.markdown("---")
 
         st.markdown(
-            f"## 📊 Summary"
+            "## 📊 Summary"
         )
 
         st.markdown(
