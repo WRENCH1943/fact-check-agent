@@ -152,7 +152,7 @@ def render_summary(verified, false, inaccurate, unverifiable):
     """
 
 
-if not uploaded_file:
+if uploaded_file:
     st.markdown("""
     <div class="empty-state">
         <h1 style="font-size: 2.5rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;">🔎 Fact Check Agent</h1>
