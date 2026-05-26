@@ -61,35 +61,9 @@ if uploaded_file:
 
             st.stop()
 
-        st.markdown("---")
-
-        st.subheader("Summary")
-
-        total_claims = len(claims)
-
-        col1, col2, col3, col4 = st.columns(4)
-
-        col1.metric(
-            "Total Claims",
-            total_claims
+        st.subheader(
+            f"Found {len(claims)} Claims"
         )
-
-        col2.metric(
-            "Verified",
-            "Pending"
-        )
-
-        col3.metric(
-            "False/Inaccurate",
-            "Pending"
-        )
-
-        col4.metric(
-            "Unverifiable",
-            "Pending"
-        )
-
-        st.markdown("---")
 
         verified_count = 0
         false_count = 0
@@ -148,7 +122,7 @@ if uploaded_file:
 
         st.markdown("---")
 
-        st.subheader("Final Results")
+        st.subheader("Summary")
 
         col1, col2, col3, col4 = st.columns(4)
 
