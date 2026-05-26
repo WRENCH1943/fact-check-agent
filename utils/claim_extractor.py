@@ -1,54 +1,183 @@
-import re
+import json
+from groq import Groq
+
+CLAIM_EXTRACTION_PROMPT = """
+You are an expert fact-checker.
+
+Read the document below and extract ONLY strong,
+verifiable factual claims.
+
+Focus on:
+- statistics
+- percentages
+- dates
+- years
+- funding
+- revenue
+- valuations
+- acquisitions
+- market share
+- user counts
+- technical metrics
+- named entity relationships
+
+IGNORE:
+- opinions
+- predictions
+- hype
+- marketing language
+- vague statements
+
+Return ONLY valid JSON array.
+
+Each item MUST contain:
+{
+  "claim": "...",
+  "category": "...",
+  "search_query": "..."
+}
+
+Allowed categories:
+- statistic
+- date
+- financial
+- technical
+- entity
+
+Rules:
+- claim must be self-contained
+- maximum 25 words
+- search query must be concise
+- maximum 15 claims
+
+DOCUMENT:
+{document}
+"""
+
+client = Groq(
+    api_key=GROQ_API_KEY
+)
 
 
-def extract_claims(text):
+def chunk_text(
+    text,
+    chunk_size=4000
+):
 
-    claims = []
+    chunks = []
 
-    sentences = re.split(r'[.\n]', text)
+    for i in range(0, len(text), chunk_size):
 
-    patterns = [
+        chunks.append(
+            text[i:i + chunk_size]
+        )
 
-        r"\d+%",
-        r"\$\d+",
-        r"\d{4}",
-        r"million",
-        r"billion",
-        r"trillion",
-
-    ]
+    return chunks
 
 
-    blacklist = [
-        "report",
-        "contents",
-        "table of",
-        "chapter"
-    ]
+def extract_claims(document):
+
+    all_claims = []
+
+    chunks = chunk_text(document)
+
+    for chunk in chunks:
+
+        prompt = CLAIM_EXTRACTION_PROMPT.format(
+            document=chunk
+        )
+
+        try:
+
+            response = client.chat.completions.create(
+
+                model="llama-3.3-70b-versatile",
+
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+
+                temperature=0,
+
+                response_format={
+                    "type": "json_object"
+                }
+
+            )
+
+            content = (
+                response
+                .choices[0]
+                .message
+                .content
+            )
+
+            parsed = json.loads(content)
+
+            if isinstance(parsed, dict):
+
+                claims = parsed.get(
+                    "claims",
+                    []
+                )
+
+            else:
+
+                claims = parsed
 
 
-    for sentence in sentences:
+            for item in claims:
 
-        clean_sentence = sentence.strip()
+                if not isinstance(item, dict):
+                    continue
 
+                if (
+                    "claim" in item and
+                    "category" in item and
+                    "search_query" in item
+                ):
 
-        # Skip very short sentences
-        if len(clean_sentence) < 25:
+                    all_claims.append({
+
+                        "claim":
+                        item["claim"].strip(),
+
+                        "category":
+                        item["category"].strip(),
+
+                        "search_query":
+                        item["search_query"].strip()
+
+                    })
+
+        except Exception as e:
+
+            print(
+                f"Claim extraction failed: {e}"
+            )
+
             continue
 
 
-        # Skip unwanted headings
-        if any(word in clean_sentence.lower() for word in blacklist):
-            continue
+    unique_claims = []
 
+    seen = set()
 
-        for pattern in patterns:
+    for item in all_claims:
 
-            if re.search(pattern, clean_sentence, re.IGNORECASE):
+        normalized = (
+            item["claim"]
+            .lower()
+            .strip()
+        )
 
-                claims.append(clean_sentence)
+        if normalized not in seen:
 
-                break
+            seen.add(normalized)
 
+            unique_claims.append(item)
 
-    return list(set(claims))
+    return unique_claims[:15]
