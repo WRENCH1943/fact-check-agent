@@ -12,152 +12,135 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+
 st.markdown("""
 <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    
-    [data-testid="stFileUploader"] {
-        border: 2px dashed #e2e8f0;
-        border-radius: 12px;
-        padding: 40px 20px;
-        background-color: #f8fafc;
-        text-align: center;
-        transition: all 0.3s ease;
-    }
 
-    [data-testid="stFileUploader"]:hover {
-        border-color: #3b82f6;
-        background-color: #eff6ff;
-    }
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
 
-    [data-testid="stFileUploader"] section {
-        padding: 0;
-        background-color: transparent;
-    }
+.stApp {
+    background: #0f172a;
+    color: #f8fafc;
+}
 
-    [data-testid="stFileUploader"] p {
-        margin-bottom: 0;
-    }
+[data-testid="stFileUploader"] {
+    border: 2px dashed #334155;
+    border-radius: 16px;
+    padding: 40px 20px;
+    background: #111827;
+}
 
-    .claim-card {
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 16px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        border-left: 5px solid #cbd5e1;
-        transition: transform 0.2s ease;
-        animation: fadeIn 0.5s ease-in-out;
-    }
+[data-testid="stFileUploader"]:hover {
+    border-color: #38bdf8;
+    background: #1e293b;
+}
 
-    .claim-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-    }
+.claim-card {
+    padding: 22px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    border-left: 6px solid #334155;
+    background: #111827;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
 
-    .status-verified {
-        border-left-color: #10b981;
-        background-color: #f0fdf4;
-    }
+.status-verified {
+    border-left-color: #22c55e;
+    background: #052e16;
+}
 
-    .status-false {
-        border-left-color: #ef4444;
-        background-color: #fef2f2;
-    }
+.status-false {
+    border-left-color: #ef4444;
+    background: #450a0a;
+}
 
-    .status-inaccurate {
-        border-left-color: #f59e0b;
-        background-color: #fffbeb;
-    }
+.status-inaccurate {
+    border-left-color: #f59e0b;
+    background: #451a03;
+}
 
-    .status-unverifiable {
-        border-left-color: #6b7280;
-        background-color: #f9fafb;
-    }
+.status-unverifiable {
+    border-left-color: #94a3b8;
+    background: #1e293b;
+}
 
-    .claim-text {
-        font-size: 16px;
-        font-weight: 500;
-        color: #1e293b;
-        margin-bottom: 12px;
-        line-height: 1.5;
-    }
+.claim-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #f8fafc;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
 
-    .claim-meta {
-        font-size: 13px;
-        color: #64748b;
-        margin-bottom: 8px;
-    }
+.claim-meta {
+    font-size: 13px;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+}
 
-    .verdict-text {
-        font-size: 14px;
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid #e2e8f0;
-        line-height: 1.6;
-    }
+.verdict-text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #e2e8f0;
+    border-top: 1px solid #334155;
+    padding-top: 12px;
+}
 
-    .metric-card {
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0;
-    }
+.metric-card {
+    background: #111827;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+}
 
-    .metric-value {
-        font-size: 32px;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
+.metric-value {
+    font-size: 34px;
+    font-weight: 700;
+}
 
-    .metric-label {
-        font-size: 14px;
-        color: #64748b;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+.metric-label {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
 
-    .metric-green .metric-value {
-        color: #10b981;
-    }
+.green {
+    color: #22c55e;
+}
 
-    .metric-red .metric-value {
-        color: #ef4444;
-    }
+.red {
+    color: #ef4444;
+}
 
-    .metric-yellow .metric-value {
-        color: #f59e0b;
-    }
+.yellow {
+    color: #f59e0b;
+}
 
-    .metric-gray .metric-value {
-        color: #6b7280;
-    }
+.gray {
+    color: #cbd5e1;
+}
 
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 60vh;
-        text-align: center;
-    }
+.title {
+    text-align: center;
+    margin-top: 40px;
+}
 
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
+.title h1 {
+    font-size: 3rem;
+    color: #f8fafc;
+    margin-bottom: 10px;
+}
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+.title p {
+    color: #94a3b8;
+    font-size: 1.05rem;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -171,8 +154,9 @@ def render_claim_card(
 
     return f"""
     <div class="claim-card {status_class}">
+
         <div class="claim-text">
-            "{claim_text}"
+            {claim_text}
         </div>
 
         <div class="claim-meta">
@@ -182,6 +166,7 @@ def render_claim_card(
         <div class="verdict-text">
             {result_text}
         </div>
+
     </div>
     """
 
@@ -194,26 +179,46 @@ def render_summary(
 ):
 
     return f"""
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:10px;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
 
-        <div class="metric-card metric-green">
-            <div class="metric-value">{verified}</div>
-            <div class="metric-label">Verified</div>
+        <div class="metric-card">
+            <div class="metric-value green">
+                {verified}
+            </div>
+
+            <div class="metric-label">
+                Verified
+            </div>
         </div>
 
-        <div class="metric-card metric-red">
-            <div class="metric-value">{false}</div>
-            <div class="metric-label">False</div>
+        <div class="metric-card">
+            <div class="metric-value red">
+                {false}
+            </div>
+
+            <div class="metric-label">
+                False
+            </div>
         </div>
 
-        <div class="metric-card metric-yellow">
-            <div class="metric-value">{inaccurate}</div>
-            <div class="metric-label">Inaccurate</div>
+        <div class="metric-card">
+            <div class="metric-value yellow">
+                {inaccurate}
+            </div>
+
+            <div class="metric-label">
+                Inaccurate
+            </div>
         </div>
 
-        <div class="metric-card metric-gray">
-            <div class="metric-value">{unverifiable}</div>
-            <div class="metric-label">Unverifiable</div>
+        <div class="metric-card">
+            <div class="metric-value gray">
+                {unverifiable}
+            </div>
+
+            <div class="metric-label">
+                Unverifiable
+            </div>
         </div>
 
     </div>
@@ -221,22 +226,20 @@ def render_summary(
 
 
 st.markdown("""
-<div class="empty-state">
+<div class="title">
 
-    <h1 style="font-size:2.5rem;font-weight:700;color:#0f172a;margin-bottom:10px;">
-        🔎 Fact Check Agent
-    </h1>
+<h1>🔎 Fact Check Agent</h1>
 
-    <p style="font-size:1.1rem;color:#64748b;max-width:400px;margin-bottom:40px;">
-        Upload a document to extract factual claims and verify them using live web search.
-    </p>
+<p>
+Upload a PDF → Extract factual claims → Verify with live web search
+</p>
 
 </div>
 """, unsafe_allow_html=True)
 
 
 uploaded_file = st.file_uploader(
-    "Drag and drop your PDF here, or click to browse",
+    "Upload PDF",
     type=["pdf"],
     label_visibility="collapsed"
 )
@@ -244,37 +247,22 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file:
 
-    st.markdown(
-        f"""
-        <div style="margin-bottom:20px;">
-
-            <h1 style="font-size:1.8rem;font-weight:700;color:#0f172a;margin-bottom:5px;">
-                🔎 Fact Check Agent
-            </h1>
-
-            <p style="color:#64748b;">
-                Analyzing:
-                <strong>{uploaded_file.name}</strong>
-            </p>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.success(
+        f"Uploaded: {uploaded_file.name}"
     )
 
     if st.button(
         "🚀 Start Fact Check",
-        use_container_width=True,
-        type="primary"
+        use_container_width=True
     ):
 
         with st.status(
-            "Analyzing Document...",
+            "Analyzing document...",
             expanded=True
         ) as status:
 
             st.write(
-                "🔍 Step 1: Extracting text from PDF..."
+                "📖 Extracting text from PDF..."
             )
 
             text = extract_text_from_pdf(
@@ -283,46 +271,34 @@ if uploaded_file:
 
             if not text.strip():
 
-                status.update(
-                    label="Extraction Failed",
-                    state="error",
-                    expanded=False
-                )
-
                 st.error(
-                    "Could not extract text from the PDF."
+                    "Could not extract text from PDF"
                 )
 
                 st.stop()
 
             st.write(
-                "🧠 Step 2: Identifying factual claims..."
+                "🧠 Extracting factual claims..."
             )
 
             claims = extract_claims(text)
 
             if not claims:
 
-                status.update(
-                    label="No Claims Found",
-                    state="error",
-                    expanded=False
-                )
-
                 st.warning(
-                    "No factual claims found."
+                    "No factual claims found"
                 )
 
                 st.stop()
 
             status.update(
-                label="Analysis Complete",
+                label="Claims extracted successfully",
                 state="complete",
                 expanded=False
             )
 
         st.markdown(
-            f"### 📝 Found {len(claims)} Claims"
+            f"## 📝 Found {len(claims)} Claims"
         )
 
         st.markdown("---")
@@ -381,7 +357,7 @@ if uploaded_file:
         st.markdown("---")
 
         st.markdown(
-            "### 📊 Summary"
+            "## 📊 Summary"
         )
 
         st.markdown(
@@ -393,3 +369,9 @@ if uploaded_file:
             ),
             unsafe_allow_html=True
         )
+
+else:
+
+    st.info(
+        "Upload a PDF to begin fact-checking"
+    )
