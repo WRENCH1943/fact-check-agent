@@ -17,115 +17,152 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-#MainMenu {
-    visibility: hidden;
-}
-
-footer {
-    visibility: hidden;
-}
-
-header {
-    visibility: hidden;
-}
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
 
 .stApp {
-    background: #0f172a;
+    background: linear-gradient(
+        180deg,
+        #0f172a 0%,
+        #111827 100%
+    );
     color: #f8fafc;
 }
 
-h1, h2, h3 {
+.block-container {
+    padding-top: 2rem;
+    max-width: 950px;
+}
+
+.hero {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 800;
     color: #f8fafc;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.hero-subtitle {
+    color: #94a3b8;
+    font-size: 1.08rem;
+}
+
+.upload-box {
+    background: rgba(17,24,39,0.85);
+    border: 2px dashed #334155;
+    border-radius: 18px;
+    padding: 25px;
+    margin-bottom: 30px;
 }
 
 [data-testid="stFileUploader"] {
-    border: 2px dashed #334155;
-    border-radius: 16px;
-    padding: 40px 20px;
-    background: #111827;
+    background: transparent;
 }
 
-[data-testid="stFileUploader"]:hover {
-    border-color: #38bdf8;
-    background: #1e293b;
+[data-testid="stFileUploader"] section {
+    padding: 0;
+    background: transparent;
 }
 
 .claim-card {
-    padding: 22px;
-    border-radius: 14px;
-    margin-bottom: 20px;
     background: #111827;
+    border: 1px solid #1e293b;
     border-left: 6px solid #334155;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
 }
 
 .status-verified {
     border-left-color: #22c55e;
-    background: #052e16;
 }
 
 .status-false {
     border-left-color: #ef4444;
-    background: #450a0a;
 }
 
 .status-inaccurate {
     border-left-color: #f59e0b;
-    background: #451a03;
 }
 
 .status-unverifiable {
     border-left-color: #94a3b8;
+}
+
+.claim-number {
+    display: inline-block;
     background: #1e293b;
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .claim-title {
     font-size: 20px;
     font-weight: 700;
     color: #f8fafc;
+    line-height: 1.6;
     margin-bottom: 14px;
 }
 
 .claim-category {
-    font-size: 14px;
+    display: inline-block;
+    background: #0f172a;
+    border: 1px solid #334155;
     color: #cbd5e1;
-    margin-bottom: 14px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    margin-bottom: 18px;
 }
 
 .claim-result {
-    font-size: 15px;
-    line-height: 1.7;
+    border-top: 1px solid #1e293b;
+    padding-top: 18px;
     color: #e2e8f0;
-    border-top: 1px solid #334155;
-    padding-top: 14px;
+    line-height: 1.8;
+    font-size: 15px;
 }
 
 .summary-grid {
     display: grid;
     grid-template-columns: repeat(4,1fr);
-    gap: 16px;
-    margin-top: 20px;
+    gap: 18px;
+    margin-top: 25px;
 }
 
 .metric-card {
     background: #111827;
-    border: 1px solid #334155;
-    border-radius: 14px;
+    border: 1px solid #1e293b;
+    border-radius: 18px;
     padding: 24px;
     text-align: center;
 }
 
-.metric-number {
-    font-size: 34px;
-    font-weight: 700;
+.metric-value {
+    font-size: 38px;
+    font-weight: 800;
 }
 
 .metric-label {
-    margin-top: 8px;
-    color: #94a3b8;
+    margin-top: 10px;
+    font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    font-size: 13px;
+    color: #94a3b8;
 }
 
 .green {
@@ -144,22 +181,28 @@ h1, h2, h3 {
     color: #cbd5e1;
 }
 
-.hero {
-    text-align: center;
-    margin-top: 50px;
-    margin-bottom: 40px;
+.stButton button {
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #38bdf8
+    ) !important;
+
+    color: white !important;
+
+    border: none !important;
+
+    border-radius: 14px !important;
+
+    height: 52px !important;
+
+    font-size: 16px !important;
+
+    font-weight: 700 !important;
 }
 
-.hero-title {
-    font-size: 3rem;
-    font-weight: 800;
-    color: #f8fafc;
-}
-
-.hero-subtitle {
-    color: #94a3b8;
-    margin-top: 10px;
-    font-size: 1.05rem;
+.stButton button:hover {
+    opacity: 0.92;
 }
 
 </style>
@@ -167,6 +210,7 @@ h1, h2, h3 {
 
 
 def render_claim_card(
+    number,
     claim_text,
     category,
     result_text,
@@ -193,12 +237,16 @@ def render_claim_card(
     return f"""
     <div class="claim-card {status_class}">
 
+        <div class="claim-number">
+            Claim {number}
+        </div>
+
         <div class="claim-title">
             {safe_claim}
         </div>
 
         <div class="claim-category">
-            📂 Category: {safe_category}
+            📂 {safe_category}
         </div>
 
         <div class="claim-result">
@@ -220,7 +268,7 @@ def render_summary(
     <div class="summary-grid">
 
         <div class="metric-card">
-            <div class="metric-number green">
+            <div class="metric-value green">
                 {verified}
             </div>
 
@@ -230,7 +278,7 @@ def render_summary(
         </div>
 
         <div class="metric-card">
-            <div class="metric-number red">
+            <div class="metric-value red">
                 {false}
             </div>
 
@@ -240,7 +288,7 @@ def render_summary(
         </div>
 
         <div class="metric-card">
-            <div class="metric-number yellow">
+            <div class="metric-value yellow">
                 {inaccurate}
             </div>
 
@@ -250,7 +298,7 @@ def render_summary(
         </div>
 
         <div class="metric-card">
-            <div class="metric-number gray">
+            <div class="metric-value gray">
                 {unverifiable}
             </div>
 
@@ -271,17 +319,27 @@ st.markdown("""
     </div>
 
     <div class="hero-subtitle">
-        Upload a PDF → Extract factual claims → Verify with live web search
+        Upload a PDF • Extract claims • Verify with live web evidence
     </div>
 
 </div>
 """, unsafe_allow_html=True)
 
 
+st.markdown(
+    '<div class="upload-box">',
+    unsafe_allow_html=True
+)
+
 uploaded_file = st.file_uploader(
     "Upload PDF",
     type=["pdf"],
     label_visibility="collapsed"
+)
+
+st.markdown(
+    '</div>',
+    unsafe_allow_html=True
 )
 
 
@@ -312,7 +370,7 @@ if uploaded_file:
             if not text.strip():
 
                 st.error(
-                    "Could not extract text from PDF"
+                    "Could not extract text from PDF."
                 )
 
                 st.stop()
@@ -326,7 +384,7 @@ if uploaded_file:
             if not claims:
 
                 st.warning(
-                    "No factual claims found"
+                    "No factual claims found."
                 )
 
                 st.stop()
@@ -382,6 +440,7 @@ if uploaded_file:
 
             st.markdown(
                 render_claim_card(
+                    number=index + 1,
                     claim_text=claim["claim"],
                     category=claim["category"],
                     result_text=result,
@@ -409,5 +468,5 @@ if uploaded_file:
 else:
 
     st.info(
-        "Upload a PDF to begin fact-checking"
+        "Upload a PDF to begin fact-checking."
     )
