@@ -796,10 +796,6 @@ if uploaded_file:
             unsafe_allow_html=True
         )
 
-        with st.spinner("🧠 Extracting factual claims..."):
-
-            claims = extract_claims(text)
-
         claims = list(set(claims))
 
         if len(claims) == 0:
