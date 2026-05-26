@@ -16,12 +16,24 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-#MainMenu {visibility:hidden;}
-footer {visibility:hidden;}
-header {visibility:hidden;}
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header {
+    visibility: hidden;
+}
 
 .stApp {
     background: #0f172a;
+    color: #f8fafc;
+}
+
+h1, h2, h3 {
     color: #f8fafc;
 }
 
@@ -40,9 +52,9 @@ header {visibility:hidden;}
 .claim-card {
     padding: 22px;
     border-radius: 14px;
-    margin-bottom: 18px;
-    border-left: 6px solid #334155;
+    margin-bottom: 20px;
     background: #111827;
+    border-left: 6px solid #334155;
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
 }
 
@@ -66,47 +78,53 @@ header {visibility:hidden;}
     background: #1e293b;
 }
 
-.claim-text {
-    font-size: 18px;
-    font-weight: 600;
+.claim-title {
+    font-size: 20px;
+    font-weight: 700;
     color: #f8fafc;
-    margin-bottom: 10px;
-    line-height: 1.6;
+    margin-bottom: 14px;
 }
 
-.claim-meta {
-    font-size: 13px;
-    color: #cbd5e1;
-    margin-bottom: 12px;
-}
-
-.verdict-text {
+.claim-category {
     font-size: 14px;
+    color: #cbd5e1;
+    margin-bottom: 14px;
+}
+
+.claim-result {
+    font-size: 15px;
     line-height: 1.7;
     color: #e2e8f0;
     border-top: 1px solid #334155;
-    padding-top: 12px;
+    padding-top: 14px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 16px;
+    margin-top: 20px;
 }
 
 .metric-card {
     background: #111827;
     border: 1px solid #334155;
     border-radius: 14px;
-    padding: 20px;
+    padding: 24px;
     text-align: center;
 }
 
-.metric-value {
+.metric-number {
     font-size: 34px;
     font-weight: 700;
 }
 
 .metric-label {
-    font-size: 13px;
+    margin-top: 8px;
     color: #94a3b8;
-    margin-top: 6px;
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-size: 13px;
 }
 
 .green {
@@ -125,19 +143,21 @@ header {visibility:hidden;}
     color: #cbd5e1;
 }
 
-.title {
+.hero {
     text-align: center;
-    margin-top: 40px;
+    margin-top: 50px;
+    margin-bottom: 40px;
 }
 
-.title h1 {
+.hero-title {
     font-size: 3rem;
+    font-weight: 800;
     color: #f8fafc;
-    margin-bottom: 10px;
 }
 
-.title p {
+.hero-subtitle {
     color: #94a3b8;
+    margin-top: 10px;
     font-size: 1.05rem;
 }
 
@@ -155,15 +175,15 @@ def render_claim_card(
     return f"""
     <div class="claim-card {status_class}">
 
-        <div class="claim-text">
+        <div class="claim-title">
             {claim_text}
         </div>
 
-        <div class="claim-meta">
+        <div class="claim-category">
             📂 Category: {category}
         </div>
 
-        <div class="verdict-text">
+        <div class="claim-result">
             {result_text}
         </div>
 
@@ -179,10 +199,10 @@ def render_summary(
 ):
 
     return f"""
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+    <div class="summary-grid">
 
         <div class="metric-card">
-            <div class="metric-value green">
+            <div class="metric-number green">
                 {verified}
             </div>
 
@@ -192,7 +212,7 @@ def render_summary(
         </div>
 
         <div class="metric-card">
-            <div class="metric-value red">
+            <div class="metric-number red">
                 {false}
             </div>
 
@@ -202,7 +222,7 @@ def render_summary(
         </div>
 
         <div class="metric-card">
-            <div class="metric-value yellow">
+            <div class="metric-number yellow">
                 {inaccurate}
             </div>
 
@@ -212,7 +232,7 @@ def render_summary(
         </div>
 
         <div class="metric-card">
-            <div class="metric-value gray">
+            <div class="metric-number gray">
                 {unverifiable}
             </div>
 
@@ -226,13 +246,15 @@ def render_summary(
 
 
 st.markdown("""
-<div class="title">
+<div class="hero">
 
-<h1>🔎 Fact Check Agent</h1>
+    <div class="hero-title">
+        🔎 Fact Check Agent
+    </div>
 
-<p>
-Upload a PDF → Extract factual claims → Verify with live web search
-</p>
+    <div class="hero-subtitle">
+        Upload a PDF → Extract factual claims → Verify with live web search
+    </div>
 
 </div>
 """, unsafe_allow_html=True)
@@ -367,7 +389,7 @@ if uploaded_file:
                 inaccurate_count,
                 unverifiable_count
             ),
-            unsafe_allow_html=False
+            unsafe_allow_html=True
         )
 
 else:
