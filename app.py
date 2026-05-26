@@ -4,23 +4,19 @@ from utils.pdf_parser import extract_text_from_pdf
 from utils.claim_extractor import extract_claims
 from utils.verifier import verify_claim
 
-# --- PAGE CONFIG ---
 st.set_page_config(
     page_title="Fact Check Agent",
     page_icon="🔎",
-    layout="centered", # Centered usually looks cleaner for text-heavy apps
+    layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# --- CUSTOM CSS ---
 st.markdown("""
 <style>
-    /* Hide default Streamlit elements for a cleaner look */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Clean up the File Uploader */
     [data-testid="stFileUploader"] {
         border: 2px dashed #e2e8f0;
         border-radius: 12px;
@@ -38,12 +34,10 @@ st.markdown("""
         background-color: transparent;
     }
     
-    /* Center the upload button text */
     [data-testid="stFileUploader"] p {
         margin-bottom: 0;
     }
 
-    /* Custom Claim Cards */
     .claim-card {
         background: #ffffff;
         padding: 20px;
@@ -59,13 +53,11 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.07);
     }
     
-    /* Status Borders */
     .status-verified { border-left-color: #10b981; background-color: #f0fdf4; }
     .status-false { border-left-color: #ef4444; background-color: #fef2f2; }
     .status-inaccurate { border-left-color: #f59e0b; background-color: #fffbeb; }
     .status-unverifiable { border-left-color: #6b7280; background-color: #f9fafb; }
 
-    /* Typography inside cards */
     .claim-text {
         font-size: 16px;
         font-weight: 500;
@@ -86,7 +78,6 @@ st.markdown("""
         line-height: 1.6;
     }
 
-    /* Summary Metric Cards */
     .metric-card {
         background: #ffffff;
         padding: 20px;
@@ -112,7 +103,6 @@ st.markdown("""
     .metric-yellow .metric-value { color: #f59e0b; }
     .metric-gray .metric-value { color: #6b7280; }
 
-    /* Centering container for empty state */
     .empty-state {
         display: flex;
         flex-direction: column;
@@ -122,7 +112,6 @@ st.markdown("""
         text-align: center;
     }
 
-    /* Animations */
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -131,7 +120,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# --- HELPER FUNCTION FOR RENDERING CLAIMS ---
 def render_claim_card(claim_text, category, result_text, status_class):
     return f"""
     <div class="claim-card {status_class}">
@@ -164,9 +152,6 @@ def render_summary(verified, false, inaccurate, unverifiable):
     """
 
 
-# --- MAIN APP LOGIC ---
-
-# Empty State (Before Upload)
 if not uploaded_file:
     st.markdown("""
     <div class="empty-state">
@@ -179,9 +164,7 @@ if not uploaded_file:
     
     uploaded_file = st.file_uploader("Drag and drop your PDF here, or click to browse", type=["pdf"], label_visibility="collapsed")
 
-# Processing State (After Upload)
 else:
-    # Header for processing page
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h1 style="font-size: 1.8rem; font-weight: 700; color: #0f172a; margin-bottom: 5px;">🔎 Fact Check Agent</h1>
@@ -191,7 +174,6 @@ else:
 
     if st.button("🚀 Start Fact Check", use_container_width=True, type="primary"):
 
-        # Use st.status for a beautiful multi-step progress indicator
         with st.status("Analyzing Document...", expanded=True) as status:
             st.write("🔍 **Step 1:** Extracting text from PDF...")
             text = extract_text_from_pdf(uploaded_file)
@@ -211,24 +193,20 @@ else:
 
             status.update(label="Analysis Complete! Verifying claims...", state="complete", expanded=False)
 
-        # Display Claims Header
         st.markdown(f"### 📝 Found {len(claims)} Claims")
         st.markdown("---")
 
-        # Tracking variables
         verified_count = 0
         false_count = 0
         inaccurate_count = 0
         unverifiable_count = 0
 
-        # Verify and Render Claims
         for index, claim in enumerate(claims):
             with st.spinner(f"Verifying claim {index + 1}..."):
                 result = verify_claim(claim["claim"])
 
             result_upper = result.upper()
             
-            # Determine styling based on result
             if "VERIFIED" in result_upper:
                 verified_count += 1
                 status_class = "status-verified"
@@ -242,7 +220,6 @@ else:
                 unverifiable_count += 1
                 status_class = "status-unverifiable"
 
-            # Render the custom HTML card
             st.markdown(
                 render_claim_card(
                     claim_text=claim["claim"], 
@@ -253,7 +230,6 @@ else:
                 unsafe_allow_html=True
             )
 
-        # Render Summary Dashboard
         st.markdown("---")
         st.markdown("### 📊 Summary")
         st.markdown(
