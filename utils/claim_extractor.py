@@ -1,6 +1,13 @@
-import streamlit as st
 import json
+import streamlit as st
+
 from groq import Groq
+
+
+client = Groq(
+    api_key=st.secrets["GROQ_API_KEY"]
+)
+
 
 CLAIM_EXTRACTION_PROMPT = """
 You are an expert fact-checker.
@@ -29,13 +36,17 @@ IGNORE:
 - marketing language
 - vague statements
 
-Return ONLY valid JSON array.
+Return ONLY valid JSON.
 
-Each item MUST contain:
+Format:
 {{
-  "claim": "...",
-  "category": "...",
-  "search_query": "..."
+  "claims": [
+    {{
+      "claim": "...",
+      "category": "...",
+      "search_query": "..."
+    }}
+  ]
 }}
 
 Allowed categories:
@@ -55,28 +66,29 @@ DOCUMENT:
 {document}
 """
 
-client = Groq(
-    api_key=st.secrets["GROQ_API_KEY"]
-)
-
 
 def chunk_text(
     text,
     chunk_size=4000
 ):
 
-    chunks = []
+    return [
 
-    for i in range(0, len(text), chunk_size):
+        text[i:i + chunk_size]
 
-        chunks.append(
-            text[i:i + chunk_size]
+        for i in range(
+            0,
+            len(text),
+            chunk_size
         )
 
-    return chunks
+    ]
 
 
 def extract_claims(document):
+
+    if not document:
+        return []
 
     all_claims = []
 
@@ -101,11 +113,7 @@ def extract_claims(document):
                     }
                 ],
 
-                temperature=0,
-
-                response_format={
-                    "type": "json_object"
-                }
+                temperature=0
 
             )
 
@@ -114,43 +122,52 @@ def extract_claims(document):
                 .choices[0]
                 .message
                 .content
+                .strip()
             )
 
             parsed = json.loads(content)
 
-            if isinstance(parsed, dict):
-
-                claims = parsed.get(
-                    "claims",
-                    []
-                )
-
-            else:
-
-                claims = parsed
-
+            claims = parsed.get(
+                "claims",
+                []
+            )
 
             for item in claims:
 
                 if not isinstance(item, dict):
                     continue
 
+                claim = (
+                    item.get("claim", "")
+                    .strip()
+                )
+
+                category = (
+                    item.get("category", "")
+                    .strip()
+                )
+
+                search_query = (
+                    item.get(
+                        "search_query",
+                        ""
+                    )
+                    .strip()
+                )
+
                 if (
-                    "claim" in item and
-                    "category" in item and
-                    "search_query" in item
+                    claim and
+                    category and
+                    search_query
                 ):
 
                     all_claims.append({
 
-                        "claim":
-                        item["claim"].strip(),
+                        "claim": claim,
 
-                        "category":
-                        item["category"].strip(),
+                        "category": category,
 
-                        "search_query":
-                        item["search_query"].strip()
+                        "search_query": search_query
 
                     })
 
