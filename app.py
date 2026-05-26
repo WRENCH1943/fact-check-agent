@@ -6,7 +6,7 @@ from utils.verifier import verify_claim
 
 
 st.set_page_config(
-    page_title="AI Fact-Check Agent",
+    page_title="GEO Platform",
     page_icon="🔎",
     layout="wide",
     initial_sidebar_state="expanded"
