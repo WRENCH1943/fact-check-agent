@@ -9,45 +9,23 @@ client = Groq(
 )
 
 
-CLAIM_EXTRACTION_PROMPT = """
-You are an expert fact-checker.
+CLAIM_EXTRACTION_PROMPT = """You are an expert fact-checker.
 
-Read the document below and extract ONLY strong,
-verifiable factual claims.
+Read the document below and extract every verifiable factual claim.
 
 Focus on:
-- statistics
-- percentages
-- dates
-- years
-- funding
-- revenue
-- valuations
-- acquisitions
-- market share
-- user counts
-- technical metrics
-- named entity relationships
+- Statistics and percentages
+- Dates and years
+- Financial figures
+- Technical figures
+- Named-entity factual statements
 
-IGNORE:
-- opinions
-- predictions
-- hype
-- marketing language
-- vague statements
+For each claim, return ONLY a JSON array.
 
-Return ONLY valid JSON.
-
-Format:
-{{
-  "claims": [
-    {{
-      "claim": "...",
-      "category": "...",
-      "search_query": "..."
-    }}
-  ]
-}}
+Each item must have:
+- "claim"
+- "category"
+- "search_query"
 
 Allowed categories:
 - statistic
@@ -56,42 +34,32 @@ Allowed categories:
 - technical
 - entity
 
-Rules:
-- claim must be self-contained
-- maximum 25 words
-- search query must be concise
-- maximum 15 claims
+Skip opinions, predictions, and marketing fluff.
+
+Extract at most 15 claims.
 
 DOCUMENT:
 {document}
+
+Return ONLY valid JSON.
+
+Example:
+[
+  {{
+    "claim": "ChatGPT has 200 million weekly active users",
+    "category": "statistic",
+    "search_query": "ChatGPT weekly active users"
+  }}
+]
 """
 
 
-def chunk_text(
-    text,
-    chunk_size=4000
-):
+def extract_claims(document_text):
 
-    return [
-
-        text[i:i + chunk_size]
-
-        for i in range(
-            0,
-            len(text),
-            chunk_size
-        )
-
-    ]
-
-
-def extract_claims(document):
-
-    if not document or len(document.strip()) < 20:
-        return []
+    truncated = document_text[:25000]
 
     prompt = CLAIM_EXTRACTION_PROMPT.format(
-        document=document[:12000]
+        document=truncated
     )
 
     try:
@@ -102,10 +70,6 @@ def extract_claims(document):
 
             messages=[
                 {
-                    "role": "system",
-                    "content": "Return only valid JSON."
-                },
-                {
                     "role": "user",
                     "content": prompt
                 }
@@ -114,7 +78,7 @@ def extract_claims(document):
             temperature=0
         )
 
-        content = (
+        raw = (
             response
             .choices[0]
             .message
@@ -122,23 +86,27 @@ def extract_claims(document):
             .strip()
         )
 
-        print(content)
+        if raw.startswith("```"):
 
-        content = (
-            content
-            .replace("```json", "")
-            .replace("```", "")
-            .strip()
-        )
+            raw = raw.split(
+                "```",
+                2
+            )[1]
 
-        parsed = json.loads(content)
+            if raw.startswith("json"):
+                raw = raw[4:]
 
-        claims = parsed.get(
-            "claims",
-            []
-        )
+            raw = raw.strip()
 
-        cleaned_claims = []
+        if raw.endswith("```"):
+            raw = raw[:-3].strip()
+
+        claims = json.loads(raw)
+
+        if not isinstance(claims, list):
+            return []
+
+        unique_claims = []
 
         seen = set()
 
@@ -152,16 +120,6 @@ def extract_claims(document):
                 ""
             ).strip()
 
-            category = item.get(
-                "category",
-                ""
-            ).strip()
-
-            search_query = item.get(
-                "search_query",
-                ""
-            ).strip()
-
             if (
                 claim and
                 claim.lower() not in seen
@@ -171,22 +129,30 @@ def extract_claims(document):
                     claim.lower()
                 )
 
-                cleaned_claims.append({
+                unique_claims.append({
 
                     "claim": claim,
 
-                    "category": category,
+                    "category":
+                    item.get(
+                        "category",
+                        ""
+                    ),
 
-                    "search_query": search_query
+                    "search_query":
+                    item.get(
+                        "search_query",
+                        claim
+                    )
 
                 })
 
-        return cleaned_claims
+        return unique_claims[:15]
 
     except Exception as e:
 
         print(
-            f"Extractor Error: {e}"
+            f"Claim extraction error: {e}"
         )
 
         return []
