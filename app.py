@@ -1,5 +1,6 @@
 import streamlit as st
-
+import pandas as pd
+from io import BytesIO
 from utils.pdf_parser import extract_text_from_pdf
 from utils.claim_extractor import extract_claims
 from utils.verifier import verify_claim
@@ -550,6 +551,47 @@ if uploaded_file:
             inaccurate_count,
             unverifiable_count,
         )
+                # ── Download Report ────────────────────────────────────────────────
+
+        report_data = []
+
+        for index, claim in enumerate(claims, start=1):
+
+            result = verify_claim(claim["claim"])
+
+            if "VERIFIED" in result.upper():
+                status = "Verified"
+            elif "FALSE" in result.upper():
+                status = "False"
+            elif "INACCURATE" in result.upper():
+                status = "Inaccurate"
+            else:
+                status = "Unverifiable"
+
+            report_data.append({
+                "Claim No.": index,
+                "Claim": claim["claim"],
+                "Category": claim["category"],
+                "Status": status,
+                "Verification Result": result
+            })
+
+        df = pd.DataFrame(report_data)
+
+        output = BytesIO()
+
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False, sheet_name="FactLens Report")
+
+        output.seek(0)
+
+        st.download_button(
+            label="⬇ DOWNLOAD REPORT",
+            data=output,
+            file_name="factlens_report.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
 
         st.markdown("""
         <div style="
@@ -580,3 +622,4 @@ else:
         Supports text-based PDF documents
     </div>
     """, unsafe_allow_html=True)
+
